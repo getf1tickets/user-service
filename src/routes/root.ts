@@ -11,7 +11,9 @@ const root: FastifyPluginAsync = async (fastify): Promise<void> => {
     url: '/:id',
     preHandler: [
       fastify.authentication.authorize(),
-      fastify.middlewares.useUser(),
+      fastify.middlewares.useUser({
+        includeAddresses: true,
+      }),
     ],
     schema: {
       response: {

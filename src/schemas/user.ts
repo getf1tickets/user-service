@@ -3,6 +3,23 @@ export const userResponseSchema = {
   properties: {
     id: { type: 'string' },
     email: { type: 'string' },
+    addresses: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          type: { type: 'string' },
+          fullName: { type: 'string' },
+          phoneNumber: { type: 'string' },
+          address: { type: 'string' },
+          city: { type: 'string' },
+          state: { type: 'string' },
+          zip: { type: 'string' },
+          country: { type: 'string' },
+        },
+      },
+    },
   },
 };
 
