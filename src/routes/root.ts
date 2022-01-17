@@ -61,6 +61,9 @@ const root: FastifyPluginAsync = async (fastify): Promise<void> => {
         throw fastify.httpErrors.internalServerError();
       }
 
+      // notify other services that a new user is created
+      await fastify.amqp.publish('user.curd', 'created', user.toJSON());
+
       reply.status(201).send(user?.toJSON());
     },
   });

@@ -36,6 +36,12 @@ const root: FastifyPluginAsync = async (fastify): Promise<void> => {
         throw fastify.httpErrors.internalServerError();
       }
 
+      // notify other services that a new address has been created
+      await fastify.amqp.publish('user.address.curd', 'created', {
+        user: request.user.toJSON(),
+        address: address.toJSON(),
+      });
+
       reply.status(201).send(address?.toJSON());
     },
   });
@@ -76,11 +82,19 @@ const root: FastifyPluginAsync = async (fastify): Promise<void> => {
         throw fastify.httpErrors.notFound();
       }
 
+      const copyAddress = { ...address.toJSON() };
+
       const [err2] = await to(address.destroy());
       if (err2) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError();
       }
+
+      // notify other services that a new address has been destroy
+      await fastify.amqp.publish('user.address.curd', 'destroy', {
+        user: request.user.toJSON(),
+        address: copyAddress,
+      });
 
       reply.status(204);
     },
