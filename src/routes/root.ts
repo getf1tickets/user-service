@@ -1,9 +1,9 @@
 import to from 'await-to-js';
 import { FastifyPluginAsync } from 'fastify';
-import { User } from '@getf1tickets/sdk';
+import { User, UserInfo } from '@getf1tickets/sdk';
 import { existUser } from '../helpers/user';
 import { hash } from '@/utils/string';
-import { userResponseSchema, userCreationSchema } from '../schemas/user';
+import { userResponseSchema, userCreationSchema, userUpdateSchema } from '@/schemas/user';
 
 const root: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.route({
@@ -22,6 +22,35 @@ const root: FastifyPluginAsync = async (fastify): Promise<void> => {
     },
     handler: async (request, reply) => {
       reply.send(request.user?.toJSON());
+    },
+  });
+
+  fastify.route<{
+    Body: {
+      info?: UserInfo
+    }
+  }>({
+    method: 'POST',
+    url: '/:id',
+    preHandler: [
+      fastify.authentication.authorize(),
+      fastify.middlewares.useUser(),
+    ],
+    schema: {
+      body: userUpdateSchema,
+    },
+    handler: async (request, reply) => {
+      if (request.body.info) {
+        await fastify.to500(UserInfo.update({
+          ...request.body.info,
+        }, {
+          where: {
+            userId: request.user.id,
+          } as any,
+        }));
+      }
+
+      reply.status(204);
     },
   });
 
