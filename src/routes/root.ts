@@ -4,6 +4,7 @@ import { User, UserInfo } from '@getf1tickets/sdk';
 import { existUser } from '../helpers/user';
 import { hash } from '@/utils/string';
 import { userResponseSchema, userCreationSchema, userUpdateSchema } from '@/schemas/user';
+import { userStatsResponse } from '@/schemas/stats';
 
 const root: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.route({
@@ -94,6 +95,27 @@ const root: FastifyPluginAsync = async (fastify): Promise<void> => {
       await fastify.amqp.publish('user.curd', 'created', user.toJSON());
 
       reply.status(201).send(user?.toJSON());
+    },
+  });
+
+  fastify.route({
+    method: 'GET',
+    url: '/stats',
+    preHandler: [
+      fastify.authentication.authorize(),
+      fastify.middlewares.useUser({
+        useToken: true,
+        shouldBeAdmin: true,
+      }),
+    ],
+    schema: {
+      response: {
+        200: userStatsResponse,
+      },
+    },
+    handler: async () => {
+      const userCount = await fastify.to500(User.count());
+      return { totalActiveUser: userCount };
     },
   });
 };

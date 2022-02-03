@@ -3,6 +3,7 @@ export const userResponseSchema = {
   properties: {
     id: { type: 'string' },
     email: { type: 'string' },
+    isAdmin: { type: 'boolean' },
     info: {
       type: 'object',
       properties: {
