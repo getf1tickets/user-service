@@ -66,5 +66,14 @@ export const userUpdateSchema = {
         country: { type: 'string' },
       },
     },
+    password: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['oldPassword', 'newPassword'],
+      properties: {
+        oldPassword: { type: 'string' },
+        newPassword: { type: 'string' },
+      },
+    },
   },
 };

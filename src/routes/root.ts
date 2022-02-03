@@ -29,6 +29,10 @@ const root: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.route<{
     Body: {
       info?: UserInfo
+      password?: {
+        oldPassword: string
+        newPassword: string
+      }
     }
   }>({
     method: 'POST',
@@ -48,6 +52,13 @@ const root: FastifyPluginAsync = async (fastify): Promise<void> => {
           where: {
             userId: request.user.id,
           } as any,
+        }));
+      }
+
+      if (request.body.password) {
+        // todo: compare current password hash
+        await fastify.to500(request.user.update({
+          hashedPassword: await hash(request.body.password.newPassword),
         }));
       }
 
