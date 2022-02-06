@@ -1,4 +1,3 @@
-import to from 'await-to-js';
 import { FastifyPluginAsync } from 'fastify';
 import { User, UserInfo } from '@getf1tickets/sdk';
 import { existUser } from '../helpers/user';
@@ -81,26 +80,28 @@ const root: FastifyPluginAsync = async (fastify): Promise<void> => {
       },
     },
     handler: async (request, reply) => {
-      const [err, exist] = await to(existUser(request.body.email));
-
-      if (err) {
-        fastify.log.error(err);
-        throw fastify.httpErrors.internalServerError();
-      }
+      const exist = await fastify.to500(existUser(request.body.email));
 
       if (exist) {
         throw fastify.httpErrors.conflict();
       }
 
-      const [err2, user] = await to(User.create({
+      const user = await fastify.to500(User.create({
         email: request.body.email,
         hashedPassword: await hash(request.body.password),
       }));
 
-      if (err2) {
-        fastify.log.error(err2);
-        throw fastify.httpErrors.internalServerError();
-      }
+      const { firstName, lastName } = request.body as any;
+      await fastify.to500(UserInfo.create({
+        name: `${firstName} ${lastName}`,
+        phoneNumber: '',
+        address: '',
+        city: '',
+        zip: '',
+        state: '',
+        country: '',
+        userId: user.id,
+      } as any));
 
       // notify other services that a new user is created
       await fastify.amqp.publish('user.curd', 'created', user.toJSON());

@@ -1,6 +1,6 @@
 {
   "name": "@getf1tickets/user-service",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "This project was bootstrapped with Fastify-CLI.",
   "main": "app.ts",
   "scripts": {
